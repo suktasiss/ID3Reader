@@ -1,6 +1,13 @@
 import read
+import sys
 
-with open('file.mp3', 'rb') as f:
+if len(sys.argv) == 1:
+    print('add file name as argument')
+    sys.exit()
+
+file_name = str(sys.argv[1])
+
+with open(file_name, 'rb') as f:
 
     contents = f.read()
 

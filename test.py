@@ -1,5 +1,6 @@
 import unittest
 import read
+from binascii import unhexlify
 
 
 class TestReadMethods(unittest.TestCase):
@@ -9,6 +10,12 @@ class TestReadMethods(unittest.TestCase):
         self.assertEqual(read.sync_safe_reader(self.to_bytes(152)), 24)
         self.assertEqual(read.sync_safe_reader(self.to_bytes(1080)), 568)
         self.assertEqual(read.sync_safe_reader(self.to_bytes(105000)), 19752)
+        self.assertEquals(read.sync_safe_reader(self.to_bytes(932938)), 237130)
+
+    def test_seek_string(self):
+        self.assertEqual(read.seek_string(b'Walter s\x00'), 'Walter s')
+        self.assertEqual(read.seek_string(b'Walter s\x00lew'), 'Walter s')
+        self.assertEqual(read.seek_string(b'Walter s'), 0)
 
     def test_isupper(self):
         self.assertTrue('FOO'.isupper())
@@ -22,16 +29,12 @@ class TestReadMethods(unittest.TestCase):
             s.split(2)
 
     @unittest.skip("reason for skipping")
-    def to_bytes(self, number):
-        length = len(bytes([number]))
-        if length < 4:
-            numb_array = [[number]]
-            while length < 4:
-                numb_array.insert(0, 0)
-            number = bytes(numb_array)
-        else:
-            number = bytes([number])
-        return number
+    def to_bytes (self, val):
+        width = val.bit_length()
+        width += 8 - ((width % 8) or 8)
+        fmt = '%%0%dx' % (width // 4)
+        s = unhexlify(fmt % val)
+        return s
 
 
 if __name__ == '__main__':
